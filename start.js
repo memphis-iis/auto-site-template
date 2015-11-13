@@ -17,6 +17,23 @@ var top = window || this;
         }
     }
 
+    // Read a page's GET URL variables and return them as an associative array.
+    function getUrlVars(){
+        var vals = {};
+        var href = "" + window.location.href;
+        var qs = href.substring(href.indexOf('?') + 1);
+
+        _.forEach(qs.split('&'), function(entry, idx) {
+            var pos = entry.indexOf('=');
+            var name = _.trim(entry.substring(0, pos));
+            var value = _.trim(entry.substring(pos + 1));
+            vals[name] = value;
+        });
+
+        console.log("URL vals", vals);
+        return vals;
+    }
+
     //Given a 'raw' HTML string, return a jQuery object representing eveything
     //within the body tag
     function parseHtmlPage(content) {
@@ -103,6 +120,39 @@ var top = window || this;
         });
     }
 
+    function cookieCheck(cookieName) {
+        cookieName = encodeURIComponent(cookieName);
+        console.log("PRE-COOKIE", document.cookie);
+
+        var cookieValue = _(document.cookie.split(';')).chain()
+            .map(function(entry){
+                var pos = entry.indexOf('=');
+                var cook = {
+                    'name': _.trim(entry.substring(0, pos)),
+                    'value': _.trim(entry.substring(pos + 1))
+                };
+                console.log(cook);
+                return cook;
+            })
+            .find('name', cookieName)
+            .result('value')
+            .value();
+
+        var ret = (!!cookieValue);
+        console.log("COOKIE:", cookieName, cookieValue, ret);
+
+        if (!!getUrlVars().nocookie) {
+            console.log("Overriding cookie - we'll pretend like it isn't there");
+            ret = false;
+        }
+
+        //Value of true for root path, expire in 180 days
+        document.cookie = cookieName + "=true; path=/; expires=" +
+            new Date(new Date().getTime() + (180 * 24 * 60 * 60 * 1000)).toGMTString();
+
+        return ret;
+    }
+
     //Called by the HTML page that wants to use us. Currently params only
     //expects fileList (a jQuery selector where we can insert the list
     //of links to indexed data)
@@ -124,5 +174,9 @@ var top = window || this;
                 processTopLevelDir(dir, dirTarget);
             });
         });
+
+        if (!cookieCheck("seenTos")) {
+            alert("Hey! You should see the TOS");
+        }
     };
 })(top);
