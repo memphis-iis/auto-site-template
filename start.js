@@ -153,13 +153,16 @@ var top = window || this;
         return ret;
     }
 
-    //Called by the HTML page that wants to use us. Currently params only
-    //expects fileList (a jQuery selector where we can insert the list
-    //of links to indexed data)
+    //Called by the HTML page that wants to use us. Currently params expects:
+    //  fileList - a jQuery selector where we can insert the list of links to
+    //             indexed data
+    //  tosModal - a jQuery selector indicating the Bootstrap modal we should
+    //             show with the Terms of Service
     module.doInit = function(params) {
         //Provide default values for expected params
         params = _.extend({
-            fileList: ''
+            fileList: '',
+            tosModal: ''
         }, params);
 
         //Clear our target and set up with the necessary contents
@@ -176,7 +179,11 @@ var top = window || this;
         });
 
         if (!cookieCheck("seenTos")) {
-            alert("Hey! You should see the TOS");
+            $(params.tosModal).modal({
+                show: true,
+                backdrop: true,
+                keyboard: true
+            });
         }
     };
 })(top);
