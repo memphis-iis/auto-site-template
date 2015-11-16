@@ -68,11 +68,15 @@ var top = window || this;
 
             var alt = cells.children("img").first().attr("alt");
             if (alt == "[PARENTDIR]") {
-                return;
+                return; //Parent directory detection #1
             }
 
             if (alt == "[DIR]") {
-                var dir = cells.eq(1).find("a").first().attr("href");
+                var anchor = cells.eq(1).find("a").first();
+                if (anchor.text() == "Parent Directory") {
+                    return; //Parent directory detection #2
+                }
+                var dir = anchor.attr("href");
                 if (!!dir) {
                     dirs.push(dir);
                 }
@@ -93,6 +97,10 @@ var top = window || this;
         //What we actually want to do
         function addDirEntry(finalUrl) {
             console.log("ADD", finalUrl, name);
+            if (!finalUrl || !name || finalUrl == "/") {
+                console.log("SKIPPING");
+                return;
+            }
             target.append(
                 $("<li></li>").append(
                     $("<a></a>").attr('href', finalUrl).text(name)
@@ -104,7 +112,7 @@ var top = window || this;
         // directories. If is NOT an Apache index, we're done. If it is, we
         // look at the list of entries (removing desktop.ini). If there's a
         // single directory, we use that
-        $.get(dirUrl, function(data) {
+        return $.get(dirUrl, function(data) {
             var page = parseHtmlPage(data);
 
             var address = page.find("address").text();
@@ -173,8 +181,30 @@ var top = window || this;
         console.log("Processing Apache Index File");
         $.get('.', function(data) {
             var page = parseHtmlPage(data);
+
+            var queries = [];
             _.forEach(apacheIndexDirs(page), function(dir, idx) {
-                processTopLevelDir(dir, dirTarget);
+                var q = processTopLevelDir(dir, dirTarget);
+                if (!!q) {
+                    queries.push(q);
+                }
+
+                $.when(queries, function() {
+                    //All queries complete - sort the ul
+                    var items = dirTarget.find('li').get();
+                    items.sort(function(a, b) {
+                        var keyA = $(a).text();
+                        var keyB = $(b).text();
+
+                        if (keyA < keyB) return -1;
+                        else if (keyA > keyB) return 1;
+                        else return 0;
+                    });
+                    dirTarget.clear();
+                    $.each(items, function(i, li) {
+                        dirTarget.append(li);
+                    });
+                });
             });
         });
 
