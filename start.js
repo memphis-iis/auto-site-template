@@ -188,22 +188,22 @@ var top = window || this;
                 if (!!q) {
                     queries.push(q);
                 }
+            });
 
-                $.when(queries, function() {
-                    //All queries complete - sort the ul
-                    var items = dirTarget.find('li').get();
-                    items.sort(function(a, b) {
-                        var keyA = $(a).text();
-                        var keyB = $(b).text();
+            $.when(queries, function() {
+                //All queries complete - sort the ul
+                var items = dirTarget.find('li').get();
+                items.sort(function(a, b) {
+                    var keyA = $(a).text();
+                    var keyB = $(b).text();
 
-                        if (keyA < keyB) return -1;
-                        else if (keyA > keyB) return 1;
-                        else return 0;
-                    });
-                    dirTarget.clear();
-                    $.each(items, function(i, li) {
-                        dirTarget.append(li);
-                    });
+                    if (keyA < keyB) return -1;
+                    else if (keyA > keyB) return 1;
+                    else return 0;
+                });
+                dirTarget.clear();
+                $.each(items, function(i, li) {
+                    dirTarget.append(li);
                 });
             });
         });
