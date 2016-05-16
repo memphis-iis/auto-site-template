@@ -115,10 +115,18 @@ var top = window || this;
         return $.get(dirUrl, function(data) {
             var page = parseHtmlPage(data);
 
+            // Allow an index page to specify that it not be shown with a div
+            // that has the "skipldc" class
+            var skipCount = page.find('.skipldc').size();
+            if (skipCount) {
+                console.log('Skipping', dirUrl, 'per .skipldc count > 0');
+                return;
+            }
+
             var address = page.find("address").text();
             if (address || address.indexOf("Apache") >= 0) {
                 var dirs = apacheIndexDirs(page);
-                console.log("Checking dirs", dirs);
+                console.log("Checked", dirUrl, "found dirs", dirs);
                 if (dirs.length == 1) {
                     dirUrl += dirs[0];
                 }
