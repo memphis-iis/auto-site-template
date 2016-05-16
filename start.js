@@ -198,18 +198,19 @@ var top = window || this;
                 }
             });
 
-            $.when(queries, function() {
+            $.when.apply($, queries).done(function() {
                 //All queries complete - sort the ul
+                console.log('QUERIES COMPLETE - sorting');
                 var items = dirTarget.find('li').get();
                 items.sort(function(a, b) {
-                    var keyA = $(a).text();
-                    var keyB = $(b).text();
+                    var keyA = $(a).text().trim().toLowerCase();
+                    var keyB = $(b).text().trim().toLowerCase();
 
                     if (keyA < keyB) return -1;
                     else if (keyA > keyB) return 1;
                     else return 0;
                 });
-                dirTarget.clear();
+                dirTarget.empty();
                 $.each(items, function(i, li) {
                     dirTarget.append(li);
                 });
